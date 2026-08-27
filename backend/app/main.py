@@ -35,14 +35,39 @@ _model_lock = None
 
 
 def get_model():
-    global _model
-    if _model is None:
-        from faster_whisper import WhisperModel
-        print(f"[asr] loading {MODEL_NAME} ({COMPUTE_TYPE}) ...")
-        t = time.time()
-        _model = WhisperModel(MODEL_NAME, device="cpu", compute_type=COMPUTE_TYPE)
-        print(f"[asr] model loaded in {time.time()-t:.1f}s")
+    global _model, _model_lock
+    import threading
+    if _model_lock is None:
+        _model_lock = threading.Lock()
+    if _model is not None:
+        return _model
+    with _model_lock:
+        if _model is None:
+            from faster_whisper import WhisperModel
+            print(f"[asr] loading {MODEL_NAME} ({COMPUTE_TYPE}) ...")
+            t = time.time()
+            _model = WhisperModel(MODEL_NAME, device="cpu", compute_type=COMPUTE_TYPE)
+            print(f"[asr] model loaded in {time.time()-t:.1f}s")
     return _model
+
+
+@app.on_event("startup")
+def _warm_model():
+    """Load the model in a background thread at boot.
+
+    Render's free tier kills requests that run longer than ~60s, so the model
+    must NOT be loaded lazily on the first /api/transcribe call. Warming it at
+    startup means the first real request is fast.
+    """
+    import threading
+
+    def _load():
+        try:
+            get_model()
+        except Exception as e:
+            print(f"[asr] warm-up failed: {e}")
+
+    threading.Thread(target=_load, daemon=True).start()
 
 
 def _segments_to_dicts(segments):
@@ -77,6 +102,16 @@ async def transcribe(
         raise HTTPException(400, "empty audio")
     if len(data) > 25 * 1024 * 1024:
         raise HTTPException(413, "audio too large (max 25 MB)")
+
+    # If the model is still warming up, wait briefly then 503 rather than
+    # blocking past Render's ~60s request timeout.
+    if _model is None:
+        import asyncio
+        deadline = time.time() + 45
+        while _model is None and time.time() < deadline:
+            await asyncio.sleep(0.5)
+        if _model is None:
+            raise HTTPException(503, "model is warming up, retry in a few seconds")
 
     model = get_model()
 
