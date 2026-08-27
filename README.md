@@ -22,10 +22,13 @@ audio ──► faster-whisper (int8, CPU)
             └── pass 2: language=hi ─┤
                                      ▼
                     time-aligned segment fusion
-                    (per-segment best avg_logprob)
+                    • EN pass is default (best romanized spelling)
+                    • HI pass wins when EN TRANSLATES instead of
+                      transcribing (low word-recovery score)
+                    • trailing Hindi-only segments appended
                                      ▼
                     Hinglish post-processing
-                    • Devanagari→Roman transliteration (schwa deletion)
+                    • Devanagari/Urdu→Roman transliteration (schwa deletion)
                     • spelling-variant canonicalization
                     • word-level hi/en tagging (lexicon + script)
                     • code-switch point detection
@@ -36,13 +39,19 @@ audio ──► faster-whisper (int8, CPU)
 ## Results
 
 Synthetic Hinglish corpus (29 code-switched utterances, gTTS hi + en-IN voices,
-known ground truth and switch points). See live numbers at `GET /api/benchmarks`.
+known ground truth and switch points). Model: faster-whisper **small**, int8 CPU.
+See live numbers at `GET /api/benchmarks`.
 
-| Metric | English-only baseline | Dual-pass (ours) |
-|---|---|---|
-| WER | reported | reported |
-| CER | reported | reported |
-| Switch detection | n/a | ±1 tolerance accuracy |
+| Metric | English-only | Hindi-only | Dual-pass (ours) |
+|---|---|---|---|
+| WER | 0.557 | 0.566 | **0.461** (−17%) |
+| CER | 0.334 | 0.228 | **0.163** (−51% vs EN) |
+| Switch detection | n/a | n/a | 0.759 (±1 tolerance) |
+
+The dual-pass system beats both monolingual baselines on WER and CER. The key
+insight: Whisper's English pass often *translates* Hindi speech into English
+("main office se ghar aa raha hoon" → "i am coming home from the office");
+word-recovery scoring detects this and defers to the Hindi pass for those spans.
 
 ## API
 
@@ -67,8 +76,9 @@ scripts/run_eval.py       WER/CER/switch benchmark runner
 scripts/test_hinglish.py  unit tests (9)
 data/eval/                corpus audio + manifest
 models/                   local faster-whisper weights
-Dockerfile                HF Space image (model baked in)
-render.yaml               Render fallback deploy
+Dockerfile                Render image (base model baked in at build)
+Dockerfile.hf             HF Space image (small model, boot-time download)
+render.yaml               Render blueprint
 ```
 
 ## Run locally
@@ -89,8 +99,9 @@ python scripts/test_hinglish.py           # unit tests
 
 ## Deploy
 
-- **Backend**: HF Space (Docker, free CPU, model baked into image) → `https://hinglish-asr.hf.space`
-- **Frontend**: Vercel static → auto-discovers backend, URL configurable in-page
+- **Backend**: Render free tier (Docker, base model baked into image) → `https://hinglish-asr.onrender.com`
+- **Frontend**: Vercel static → `https://hinglish-asr.vercel.app` (auto-discovers backend, URL configurable in-page)
+- `Dockerfile.hf` is an alternate HF Space image (small model, downloaded at boot) if you prefer HF hosting.
 
 ## Why it's production-ready
 
