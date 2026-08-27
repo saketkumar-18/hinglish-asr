@@ -54,6 +54,49 @@ def has_devanagari(text: str) -> bool:
     return any("\u0900" <= ch <= "\u097F" for ch in text)
 
 
+def has_arabic_urdu(text: str) -> bool:
+    """Whisper's hi pass sometimes emits Urdu (Nastaliq) script for Hindi speech."""
+    return any(("\u0600" <= ch <= "\u06FF") or ("\u0750" <= ch <= "\u077F") for ch in text)
+
+
+# Urdu consonants -> romanized approximation (Hinglish-oriented)
+_URDU = {
+    "ا": "a", "آ": "aa", "ب": "b", "پ": "p", "ت": "t", "ٹ": "t", "ث": "s",
+    "ج": "j", "چ": "ch", "ح": "h", "خ": "kh", "د": "d", "ڈ": "d", "ذ": "z",
+    "ر": "r", "ڑ": "r", "ز": "z", "ژ": "zh", "س": "s", "ش": "sh", "ص": "s",
+    "ض": "z", "ط": "t", "ظ": "z", "ع": "", "غ": "g", "ف": "f", "ق": "q",
+    "ک": "k", "ك": "k", "گ": "g", "ل": "l", "م": "m", "ن": "n", "ں": "n",
+    "و": "v", "ہ": "h", "ھ": "h", "ء": "", "ی": "y", "ي": "y", "ے": "e",
+    "أ": "a", "إ": "i", "ؤ": "o", "ئ": "y",
+}
+_URDU_DIACRITICS = {
+    "َ": "a", "ِ": "i", "ُ": "u", "ً": "an", "ٍ": "in", "ٌ": "un",
+    "ّ": "", "ْ": "", "ٰ": "a", "ٓ": "",
+}
+_URDU_DIGITS = {
+    "۰": "0", "۱": "1", "۲": "2", "۳": "3", "۴": "4",
+    "۵": "5", "۶": "6", "۷": "7", "۸": "8", "۹": "9",
+    "٠": "0", "١": "1", "٢": "2", "٣": "3", "٤": "4",
+    "٥": "5", "٦": "6", "٧": "7", "٨": "8", "٩": "9",
+}
+
+
+def transliterate_urdu_word(word: str) -> str:
+    out = []
+    for ch in word:
+        if ch in _URDU:
+            out.append(_URDU[ch])
+        elif ch in _URDU_DIACRITICS:
+            out.append(_URDU_DIACRITICS[ch])
+        elif ch in _URDU_DIGITS:
+            out.append(_URDU_DIGITS[ch])
+        else:
+            out.append(ch)
+    rom = "".join(out)
+    rom = re.sub(r"([a-z])\1{2,}", r"\1\1", rom)  # cap triple letters
+    return rom
+
+
 def transliterate_word(word: str) -> str:
     """Transliterate one Devanagari word to common Hinglish romanization.
 
@@ -103,21 +146,36 @@ def transliterate_word(word: str) -> str:
 
 
 def transliterate(text: str) -> str:
-    """Transliterate any Devanagari runs in text, leaving Latin text alone."""
-    if not has_devanagari(text):
+    """Transliterate any Devanagari or Urdu runs in text, leaving Latin alone."""
+    if not has_devanagari(text) and not has_arabic_urdu(text):
         return text
     out = []
     buf = []
+    buf_kind = None  # 'dev' or 'urdu'
+
+    def flush():
+        nonlocal buf, buf_kind
+        if buf:
+            w = "".join(buf)
+            out.append(transliterate_word(w) if buf_kind == "dev" else transliterate_urdu_word(w))
+            buf = []
+            buf_kind = None
+
     for ch in text:
         if "\u0900" <= ch <= "\u097F":
+            if buf_kind != "dev":
+                flush()
+                buf_kind = "dev"
+            buf.append(ch)
+        elif ("\u0600" <= ch <= "\u06FF") or ("\u0750" <= ch <= "\u077F"):
+            if buf_kind != "urdu":
+                flush()
+                buf_kind = "urdu"
             buf.append(ch)
         else:
-            if buf:
-                out.append(transliterate_word("".join(buf)))
-                buf = []
+            flush()
             out.append(ch)
-    if buf:
-        out.append(transliterate_word("".join(buf)))
+    flush()
     return "".join(out)
 
 
@@ -237,7 +295,7 @@ ask asked answer answered question problem solution idea plan start stop
 
 def tag_word(word: str) -> str:
     """Return 'hi' or 'en' for a word."""
-    if has_devanagari(word):
+    if has_devanagari(word) or has_arabic_urdu(word):
         return "hi"
     w = word.lower().strip(".,!?;:'\"()[]{}")
     if not w:
@@ -253,10 +311,10 @@ def tag_word(word: str) -> str:
 
 
 def tag_words(text: str) -> List[Dict[str, str]]:
-    words = re.findall(r"[\w\u0900-\u097F]+(?:['’][\w\u0900-\u097F]+)?|[^\w\s\u0900-\u097F]", text)
+    words = re.findall(r"[\w\u0900-\u097F\u0600-\u06FF\u0750-\u077F]+(?:['’][\w\u0900-\u097F]+)?|[^\w\s\u0900-\u097F\u0600-\u06FF\u0750-\u077F]", text)
     out = []
     for w in words:
-        if re.fullmatch(r"[^\w\s\u0900-\u097F]", w):
+        if re.fullmatch(r"[^\w\s\u0900-\u097F\u0600-\u06FF\u0750-\u077F]", w):
             continue
         out.append({"word": w, "lang": tag_word(w)})
     return out
@@ -309,13 +367,77 @@ def postprocess(text: str) -> Dict:
 # 5. Dual-pass fusion
 # ---------------------------------------------------------------------------
 
+_WORD_RE = re.compile(r"[\w\u0900-\u097F\u0600-\u06FF\u0750-\u077F]+")
+
+
+def _content_words(text: str) -> List[str]:
+    return [canonicalize_word(w.lower()) for w in _WORD_RE.findall(text)]
+
+
+def _consonants(w: str) -> str:
+    """Consonant skeleton: strip vowels. Handles transliteration vowel swaps."""
+    return "".join(c for c in w.lower() if c not in "aeiou")
+
+
+def _similar(a: str, b: str) -> bool:
+    """Cheap fuzzy match tolerant of transliteration spelling variants."""
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    import difflib
+    ratio = difflib.SequenceMatcher(None, a, b).ratio()
+    short = min(len(a), len(b)) <= 4
+    if ratio >= (0.6 if short else 0.75):
+        return True
+    if len(a) >= 3 and len(b) >= 3 and (a.startswith(b[:3]) or b.startswith(a[:3])):
+        # 3-char prefix match plus comparable length -> treat as same word
+        if 0.6 <= len(a) / len(b) <= 1.6:
+            return True
+    # consonant-skeleton match (mi/me, eemel/email, doktar/doctor)
+    ca, cb = _consonants(a), _consonants(b)
+    if ca and cb:
+        if ca == cb:
+            return True
+        if min(len(ca), len(cb)) >= 2 and difflib.SequenceMatcher(None, ca, cb).ratio() >= 0.8:
+            return True
+    return False
+
+
+def translation_score(en_text: str, hi_text: str) -> float:
+    """Fraction of Hindi-pass content words recoverable from the English pass.
+
+    Whisper's English pass sometimes TRANSLATES Hindi speech into English
+    ("main office se ghar aa raha hoon" -> "i am coming home from the office").
+    A low recovery ratio signals translation, so the Hindi pass should win.
+    """
+    hi_words = _content_words(transliterate(hi_text))
+    en_words = _content_words(en_text)
+    if not hi_words:
+        return 1.0
+    if not en_words:
+        return 0.0
+    hits = 0
+    for hw in hi_words:
+        if any(_similar(hw, ew) for ew in en_words):
+            hits += 1
+    return hits / len(hi_words)
+
+
+TRANSLATION_THRESHOLD = 0.45  # below this, the EN pass is translating, not transcribing
+
+
 def fuse_segments(segs_en: List[Dict], segs_hi: List[Dict]) -> List[Dict]:
     """Time-aligned fusion of English-pass and Hindi-pass hypotheses.
 
-    For each English-pass segment, find overlapping Hindi-pass segments and
-    choose the hypothesis with the better length-normalized log-probability.
-    Hindi text is transliterated so the final transcript is consistently
-    romanized Hinglish.
+    Strategy (validated on the synthetic Hinglish eval set):
+      * The English pass usually produces the best romanized Hinglish, so it
+        is the default source for each time span.
+      * When the English pass TRANSLATES the speech instead of transcribing it
+        (low word recovery vs the Hindi pass), the Hindi pass wins and its
+        output is transliterated to Roman script.
+      * Hindi-pass segments with no English overlap (e.g. trailing Hindi
+        speech the EN pass dropped) are appended, transliterated.
     """
     chosen: List[Dict] = []
     used_hi = set()
@@ -329,30 +451,27 @@ def fuse_segments(segs_en: List[Dict], segs_hi: List[Dict]) -> List[Dict]:
             if ov > best_overlap:
                 best_overlap = ov
                 best_hi = (idx, sh)
+
         dur = max(s1 - s0, 1e-6)
-        use_hi = False
-        hi_text = ""
         if best_hi is not None and best_overlap / dur >= 0.4:
             idx, sh = best_hi
-            # compare normalized confidence
-            score_en = se.get("avg_logprob", -1.0)
-            score_hi = sh.get("avg_logprob", -1.0)
-            if score_hi >= score_en - 0.05:
-                use_hi = True
-                hi_text = sh["text"]
+            rec = translation_score(se["text"], sh["text"])
+            if rec < TRANSLATION_THRESHOLD:
+                # EN pass translated this span -> use Hindi pass
+                chosen.append({
+                    "start": s0, "end": s1,
+                    "text": transliterate(sh["text"]).strip(),
+                    "source": "hi",
+                    "avg_logprob": sh.get("avg_logprob"),
+                })
                 used_hi.add(idx)
-        if use_hi:
-            chosen.append({
-                "start": s0, "end": s1, "text": transliterate(hi_text).strip(),
-                "source": "hi",
-                "avg_logprob": best_hi[1].get("avg_logprob"),
-            })
-        else:
-            chosen.append({
-                "start": s0, "end": s1, "text": se["text"].strip(),
-                "source": "en",
-                "avg_logprob": se.get("avg_logprob"),
-            })
+                continue
+            # otherwise EN pass is transcribing fine -> keep it (better spelling)
+        chosen.append({
+            "start": s0, "end": s1, "text": se["text"].strip(),
+            "source": "en",
+            "avg_logprob": se.get("avg_logprob"),
+        })
 
     # append Hindi-only segments with no English overlap (trailing Hindi speech)
     for idx, sh in enumerate(segs_hi):

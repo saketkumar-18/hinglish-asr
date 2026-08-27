@@ -53,8 +53,9 @@ def test_postprocess_pipeline():
     assert abs(pp["language_ratio"]["hi"] + pp["language_ratio"]["en"] - 1) < 0.01
 
 
-def test_fuse_segments_prefers_hi_on_overlap():
-    segs_en = [{"start": 0.0, "end": 2.0, "text": "main office ja raha hoon", "avg_logprob": -0.5}]
+def test_fuse_segments_prefers_hi_when_en_translates():
+    # EN pass TRANSLATED the Hindi speech -> Hindi pass must win
+    segs_en = [{"start": 0.0, "end": 2.0, "text": "i am going to the office", "avg_logprob": -0.2}]
     segs_hi = [{"start": 0.0, "end": 2.0, "text": "मैं ऑफिस जा रहा हूँ", "avg_logprob": -0.3}]
     fused = fuse_segments(segs_en, segs_hi)
     assert len(fused) == 1
@@ -62,7 +63,8 @@ def test_fuse_segments_prefers_hi_on_overlap():
     assert not has_devanagari(fused[0]["text"])
 
 
-def test_fuse_keeps_en_when_hi_worse():
+def test_fuse_keeps_en_when_transcribing():
+    # EN pass transcribed the Hinglish faithfully -> keep EN (better spelling)
     segs_en = [{"start": 0.0, "end": 2.0, "text": "send me the email", "avg_logprob": -0.2}]
     segs_hi = [{"start": 0.0, "end": 2.0, "text": "सेंड मी द ईमेल", "avg_logprob": -0.9}]
     fused = fuse_segments(segs_en, segs_hi)

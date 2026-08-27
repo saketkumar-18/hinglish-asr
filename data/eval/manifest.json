@@ -1,7 +1,7 @@
 [
   {
     "id": "eval_001",
-    "audio": "audio/eval_001.mp3",
+    "audio": "audio/eval_001.wav",
     "truth": "mujhe kal meeting mein presentation deni hai",
     "switches": 4,
     "chunks": [
@@ -29,7 +29,7 @@
   },
   {
     "id": "eval_002",
-    "audio": "audio/eval_002.mp3",
+    "audio": "audio/eval_002.wav",
     "truth": "ye app bahut accha hai",
     "switches": 2,
     "chunks": [
@@ -49,7 +49,7 @@
   },
   {
     "id": "eval_003",
-    "audio": "audio/eval_003.mp3",
+    "audio": "audio/eval_003.wav",
     "truth": "main office se ghar aa raha hoon",
     "switches": 2,
     "chunks": [
@@ -77,7 +77,7 @@
   },
   {
     "id": "eval_004",
-    "audio": "audio/eval_004.mp3",
+    "audio": "audio/eval_004.wav",
     "truth": "kya tum mujhe email bhej sakte ho",
     "switches": 2,
     "chunks": [
@@ -97,7 +97,7 @@
   },
   {
     "id": "eval_005",
-    "audio": "audio/eval_005.mp3",
+    "audio": "audio/eval_005.wav",
     "truth": "mera laptop kharab ho gaya hai",
     "switches": 2,
     "chunks": [
@@ -117,7 +117,7 @@
   },
   {
     "id": "eval_006",
-    "audio": "audio/eval_006.mp3",
+    "audio": "audio/eval_006.wav",
     "truth": "aaj weather bahut accha hai",
     "switches": 2,
     "chunks": [
@@ -137,7 +137,7 @@
   },
   {
     "id": "eval_007",
-    "audio": "audio/eval_007.mp3",
+    "audio": "audio/eval_007.wav",
     "truth": "humein project jaldi submit karna hai",
     "switches": 4,
     "chunks": [
@@ -165,12 +165,12 @@
   },
   {
     "id": "eval_008",
-    "audio": "audio/eval_008.mp3",
-    "truth": "ye restaurant ka khana bahut tasty hai",
-    "switches": 2,
+    "audio": "audio/eval_008.wav",
+    "truth": "is restaurant ka khana bahut tasty hai",
+    "switches": 4,
     "chunks": [
       [
-        "यह",
+        "इस",
         "hi"
       ],
       [
@@ -178,14 +178,22 @@
         "en"
       ],
       [
-        "का खाना बहुत tasty है",
+        "का खाना बहुत",
+        "hi"
+      ],
+      [
+        "tasty",
+        "en"
+      ],
+      [
+        "है",
         "hi"
       ]
     ]
   },
   {
     "id": "eval_009",
-    "audio": "audio/eval_009.mp3",
+    "audio": "audio/eval_009.wav",
     "truth": "meri train late ho rahi hai",
     "switches": 2,
     "chunks": [
@@ -205,7 +213,7 @@
   },
   {
     "id": "eval_010",
-    "audio": "audio/eval_010.mp3",
+    "audio": "audio/eval_010.wav",
     "truth": "tumne assignment poora kiya ya nahi",
     "switches": 2,
     "chunks": [
@@ -225,7 +233,7 @@
   },
   {
     "id": "eval_011",
-    "audio": "audio/eval_011.mp3",
+    "audio": "audio/eval_011.wav",
     "truth": "mujhe hindi gaane bahut pasand hai",
     "switches": 2,
     "chunks": [
@@ -245,7 +253,7 @@
   },
   {
     "id": "eval_012",
-    "audio": "audio/eval_012.mp3",
+    "audio": "audio/eval_012.wav",
     "truth": "kal interview hai to mujhe taiyari karni hai",
     "switches": 2,
     "chunks": [
@@ -265,7 +273,7 @@
   },
   {
     "id": "eval_013",
-    "audio": "audio/eval_013.mp3",
+    "audio": "audio/eval_013.wav",
     "truth": "ye phone bahut mehenga hai",
     "switches": 2,
     "chunks": [
@@ -285,7 +293,7 @@
   },
   {
     "id": "eval_014",
-    "audio": "audio/eval_014.mp3",
+    "audio": "audio/eval_014.wav",
     "truth": "hum log weekend par movie dekhne jayenge",
     "switches": 4,
     "chunks": [
@@ -313,7 +321,7 @@
   },
   {
     "id": "eval_015",
-    "audio": "audio/eval_015.mp3",
+    "audio": "audio/eval_015.wav",
     "truth": "mera internet bahut dheema chal raha hai",
     "switches": 2,
     "chunks": [
@@ -333,7 +341,7 @@
   },
   {
     "id": "eval_016",
-    "audio": "audio/eval_016.mp3",
+    "audio": "audio/eval_016.wav",
     "truth": "aapko password badalna chahiye",
     "switches": 2,
     "chunks": [
@@ -353,9 +361,9 @@
   },
   {
     "id": "eval_017",
-    "audio": "audio/eval_017.mp3",
+    "audio": "audio/eval_017.wav",
     "truth": "ye book bahut interesting hai",
-    "switches": 2,
+    "switches": 4,
     "chunks": [
       [
         "यह",
@@ -366,14 +374,22 @@
         "en"
       ],
       [
-        "बहुत interesting है",
+        "बहुत",
+        "hi"
+      ],
+      [
+        "interesting",
+        "en"
+      ],
+      [
+        "है",
         "hi"
       ]
     ]
   },
   {
     "id": "eval_018",
-    "audio": "audio/eval_018.mp3",
+    "audio": "audio/eval_018.wav",
     "truth": "mujhe doctor se appointment lena hai",
     "switches": 4,
     "chunks": [
@@ -401,7 +417,7 @@
   },
   {
     "id": "eval_019",
-    "audio": "audio/eval_019.mp3",
+    "audio": "audio/eval_019.wav",
     "truth": "ghar par wifi nahi chal raha",
     "switches": 2,
     "chunks": [
@@ -421,7 +437,7 @@
   },
   {
     "id": "eval_020",
-    "audio": "audio/eval_020.mp3",
+    "audio": "audio/eval_020.wav",
     "truth": "maine online khana order kiya hai",
     "switches": 4,
     "chunks": [
@@ -449,7 +465,7 @@
   },
   {
     "id": "eval_021",
-    "audio": "audio/eval_021.mp3",
+    "audio": "audio/eval_021.wav",
     "truth": "tum class mein aaye the ya nahi",
     "switches": 2,
     "chunks": [
@@ -469,7 +485,7 @@
   },
   {
     "id": "eval_022",
-    "audio": "audio/eval_022.mp3",
+    "audio": "audio/eval_022.wav",
     "truth": "meri battery khatam ho gayi hai",
     "switches": 2,
     "chunks": [
@@ -489,7 +505,7 @@
   },
   {
     "id": "eval_023",
-    "audio": "audio/eval_023.mp3",
+    "audio": "audio/eval_023.wav",
     "truth": "humein team ke saath discussion karna hai",
     "switches": 4,
     "chunks": [
@@ -517,7 +533,7 @@
   },
   {
     "id": "eval_024",
-    "audio": "audio/eval_024.mp3",
+    "audio": "audio/eval_024.wav",
     "truth": "ye song bahut accha hai phir se chalao",
     "switches": 2,
     "chunks": [
@@ -530,14 +546,14 @@
         "en"
       ],
       [
-        "बहुत अच्छा है, फिर से चलाओ",
+        "बहुत अच्छा है फिर से चलाओ",
         "hi"
       ]
     ]
   },
   {
     "id": "eval_025",
-    "audio": "audio/eval_025.mp3",
+    "audio": "audio/eval_025.wav",
     "truth": "mera flight do ghante late hai",
     "switches": 2,
     "chunks": [
@@ -557,9 +573,9 @@
   },
   {
     "id": "eval_026",
-    "audio": "audio/eval_026.mp3",
+    "audio": "audio/eval_026.wav",
     "truth": "aaj ka match bahut exciting tha",
-    "switches": 2,
+    "switches": 4,
     "chunks": [
       [
         "आज का",
@@ -570,14 +586,22 @@
         "en"
       ],
       [
-        "बहुत exciting था",
+        "बहुत",
+        "hi"
+      ],
+      [
+        "exciting",
+        "en"
+      ],
+      [
+        "था",
         "hi"
       ]
     ]
   },
   {
     "id": "eval_027",
-    "audio": "audio/eval_027.mp3",
+    "audio": "audio/eval_027.wav",
     "truth": "mujhe english bolne mein thodi dikkat hoti hai",
     "switches": 2,
     "chunks": [
@@ -597,7 +621,7 @@
   },
   {
     "id": "eval_028",
-    "audio": "audio/eval_028.mp3",
+    "audio": "audio/eval_028.wav",
     "truth": "kya is hotel mein breakfast milega",
     "switches": 4,
     "chunks": [
@@ -625,7 +649,7 @@
   },
   {
     "id": "eval_029",
-    "audio": "audio/eval_029.mp3",
+    "audio": "audio/eval_029.wav",
     "truth": "pehle data backup kar lo phir install karo",
     "switches": 4,
     "chunks": [
@@ -638,7 +662,7 @@
         "en"
       ],
       [
-        "बैकअप कर लो, फिर",
+        "बैकअप कर लो फिर",
         "hi"
       ],
       [

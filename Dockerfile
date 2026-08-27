@@ -10,13 +10,11 @@ COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
 COPY backend /app/backend
+COPY scripts/download_model.py /app/download_model.py
 
 # Bake the base model into the image at build time.
-RUN mkdir -p /app/models/faster-whisper-base \
-    && for f in model.bin config.json tokenizer.json vocabulary.txt; do \
-         curl -fsSL --retry 3 -o /app/models/faster-whisper-base/$f \
-           "https://huggingface.co/Systran/faster-whisper-base/resolve/main/$f"; \
-       done
+# (python:3.11-slim has no curl/wget, so download with Python.)
+RUN python /app/download_model.py Systran/faster-whisper-base /app/models/faster-whisper-base
 
 ENV WHISPER_MODEL=/app/models/faster-whisper-base
 ENV WHISPER_COMPUTE=int8
