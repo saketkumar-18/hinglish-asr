@@ -80,12 +80,26 @@ async def transcribe(
 
     model = get_model()
 
-    # decode to 16k mono float32 via faster-whisper's internal decoder
+    # decode to 16k mono float32 via faster-whisper's internal decoder.
+    # decode_audio (PyAV) needs a real file path, so spool the upload to a
+    # temp file first.
     from faster_whisper.audio import decode_audio
+    import tempfile
+    suffix = os.path.splitext(file.filename or "audio.wav")[1] or ".wav"
+    tmp_path = None
     try:
-        audio = decode_audio(io.BytesIO(data).read(), sampling_rate=16000)
+        with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tf:
+            tf.write(data)
+            tmp_path = tf.name
+        audio = decode_audio(tmp_path, sampling_rate=16000)
     except Exception as e:
         raise HTTPException(400, f"could not decode audio: {e}")
+    finally:
+        if tmp_path:
+            try:
+                os.unlink(tmp_path)
+            except Exception:
+                pass
 
     t0 = time.time()
 
