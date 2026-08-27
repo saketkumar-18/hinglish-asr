@@ -20,6 +20,9 @@ from app.hinglish import postprocess, fuse_segments
 
 MODEL_NAME = os.environ.get("WHISPER_MODEL", "small")
 COMPUTE_TYPE = os.environ.get("WHISPER_COMPUTE", "int8")
+# beam_size=1 (greedy) is ~5x faster than beam_size=5 and nearly as accurate;
+# required to stay under Render free-tier's ~60s request timeout on slow CPU.
+BEAM_SIZE = int(os.environ.get("WHISPER_BEAM_SIZE", "1"))
 
 app = FastAPI(title="Hinglish ASR", version="1.0.0")
 
@@ -138,20 +141,28 @@ async def transcribe(
 
     t0 = time.time()
 
-    # English pass
-    segs_en_gen, info_en = model.transcribe(
-        audio, language="en", task="transcribe",
-        vad_filter=True, beam_size=5,
-    )
-    segs_en = _segments_to_dicts(segs_en_gen)
-
-    segs_hi = []
-    if dual_pass:
-        segs_hi_gen, info_hi = model.transcribe(
-            audio, language="hi", task="transcribe",
-            vad_filter=True, beam_size=5,
+    def _run_asr():
+        # English pass
+        segs_en_gen, info_en = model.transcribe(
+            audio, language="en", task="transcribe",
+            vad_filter=True, beam_size=BEAM_SIZE,
         )
-        segs_hi = _segments_to_dicts(segs_hi_gen)
+        segs_en = _segments_to_dicts(segs_en_gen)
+
+        segs_hi = []
+        info_hi = None
+        if dual_pass:
+            segs_hi_gen, info_hi = model.transcribe(
+                audio, language="hi", task="transcribe",
+                vad_filter=True, beam_size=BEAM_SIZE,
+            )
+            segs_hi = _segments_to_dicts(segs_hi_gen)
+        return segs_en, segs_hi, info_en
+
+    # Run the CPU-bound transcription off the event loop so /api/health and
+    # other requests stay responsive while a job is in flight.
+    import asyncio
+    segs_en, segs_hi, info_en = await asyncio.to_thread(_run_asr)
 
     if dual_pass and segs_hi:
         fused = fuse_segments(segs_en, segs_hi)
