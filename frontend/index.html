@@ -341,7 +341,9 @@ async function loadSamples() {
       b.textContent = "▶ " + s.label;
       b.addEventListener("click", async () => {
         const ab = await (await fetch(API + s.url)).arrayBuffer();
-        sendAudio(new Blob([ab], { type: "audio/mpeg" }), s.id + ".mp3");
+        const ext = s.ext || ".wav";
+        const mime = ext === ".mp3" ? "audio/mpeg" : "audio/wav";
+        sendAudio(new Blob([ab], { type: mime }), s.id + ext);
       });
       row.appendChild(b);
     });

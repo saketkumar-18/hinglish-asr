@@ -216,8 +216,9 @@ def samples_list():
     if os.path.isdir(samples_dir) and os.path.exists(manifest):
         with open(manifest, "r", encoding="utf-8") as f:
             for item in json.load(f):
+                ext = item.get("ext", ".wav")
                 out.append({"id": item["id"], "label": item.get("label", item["id"]),
-                            "url": f"/api/samples/{item['id']}"})
+                            "url": f"/api/samples/{item['id']}", "ext": ext})
     return out
 
 
