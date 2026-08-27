@@ -228,7 +228,9 @@ def sample_file(sample_id: str):
     if not re.fullmatch(r"[A-Za-z0-9_\-]+", sample_id):
         raise HTTPException(400, "bad id")
     samples_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "samples"))
-    path = os.path.join(samples_dir, sample_id + ".mp3")
-    if not os.path.exists(path):
-        raise HTTPException(404, "sample not found")
-    return FileResponse(path, media_type="audio/mpeg")
+    # samples are lossless WAV now; fall back to legacy MP3
+    for ext, media in ((".wav", "audio/wav"), (".mp3", "audio/mpeg")):
+        path = os.path.join(samples_dir, sample_id + ext)
+        if os.path.exists(path):
+            return FileResponse(path, media_type=media)
+    raise HTTPException(404, "sample not found")

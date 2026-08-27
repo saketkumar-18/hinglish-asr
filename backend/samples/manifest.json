@@ -2,21 +2,25 @@
   {
     "id": "eval_001",
     "label": "Meeting mein presentation",
-    "truth": "mujhe kal meeting mein presentation deni hai"
+    "truth": "mujhe kal meeting mein presentation deni hai",
+    "ext": ".wav"
   },
   {
     "id": "eval_006",
     "label": "Mera laptop kharab",
-    "truth": "aaj weather bahut accha hai"
+    "truth": "aaj weather bahut accha hai",
+    "ext": ".wav"
   },
   {
     "id": "eval_015",
     "label": "Weekend par movie",
-    "truth": "mera internet bahut dheema chal raha hai"
+    "truth": "mera internet bahut dheema chal raha hai",
+    "ext": ".wav"
   },
   {
     "id": "eval_021",
     "label": "Online khana order",
-    "truth": "tum class mein aaye the ya nahi"
+    "truth": "tum class mein aaye the ya nahi",
+    "ext": ".wav"
   }
 ]

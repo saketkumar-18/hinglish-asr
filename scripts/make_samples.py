@@ -25,9 +25,11 @@ for pid, label in PICKS:
         print(f"missing {pid}")
         continue
     src = os.path.join(EVAL, item["audio"])
-    dst = os.path.join(OUT, pid + ".mp3")
+    # eval audio is lossless WAV now; keep the extension
+    ext = os.path.splitext(item["audio"])[1] or ".wav"
+    dst = os.path.join(OUT, pid + ext)
     shutil.copyfile(src, dst)
-    out_manifest.append({"id": pid, "label": label, "truth": item["truth"]})
+    out_manifest.append({"id": pid, "label": label, "truth": item["truth"], "ext": ext})
     print(f"copied {pid} -> {dst}")
 
 with open(os.path.join(OUT, "manifest.json"), "w", encoding="utf-8") as f:
