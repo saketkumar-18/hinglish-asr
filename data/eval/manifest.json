@@ -1,0 +1,654 @@
+[
+  {
+    "id": "eval_001",
+    "audio": "audio/eval_001.mp3",
+    "truth": "mujhe kal meeting mein presentation deni hai",
+    "switches": 4,
+    "chunks": [
+      [
+        "मुझे कल",
+        "hi"
+      ],
+      [
+        "meeting",
+        "en"
+      ],
+      [
+        "में",
+        "hi"
+      ],
+      [
+        "presentation",
+        "en"
+      ],
+      [
+        "देनी है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_002",
+    "audio": "audio/eval_002.mp3",
+    "truth": "ye app bahut accha hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "यह",
+        "hi"
+      ],
+      [
+        "app",
+        "en"
+      ],
+      [
+        "बहुत अच्छा है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_003",
+    "audio": "audio/eval_003.mp3",
+    "truth": "main office se ghar aa raha hoon",
+    "switches": 2,
+    "chunks": [
+      [
+        "मैं",
+        "hi"
+      ],
+      [
+        "office",
+        "en"
+      ],
+      [
+        "से",
+        "hi"
+      ],
+      [
+        "घर",
+        "hi"
+      ],
+      [
+        "आ रहा हूँ",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_004",
+    "audio": "audio/eval_004.mp3",
+    "truth": "kya tum mujhe email bhej sakte ho",
+    "switches": 2,
+    "chunks": [
+      [
+        "क्या तुम मुझे",
+        "hi"
+      ],
+      [
+        "email",
+        "en"
+      ],
+      [
+        "भेज सकते हो",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_005",
+    "audio": "audio/eval_005.mp3",
+    "truth": "mera laptop kharab ho gaya hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "मेरा",
+        "hi"
+      ],
+      [
+        "laptop",
+        "en"
+      ],
+      [
+        "खराब हो गया है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_006",
+    "audio": "audio/eval_006.mp3",
+    "truth": "aaj weather bahut accha hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "आज",
+        "hi"
+      ],
+      [
+        "weather",
+        "en"
+      ],
+      [
+        "बहुत अच्छा है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_007",
+    "audio": "audio/eval_007.mp3",
+    "truth": "humein project jaldi submit karna hai",
+    "switches": 4,
+    "chunks": [
+      [
+        "हमें",
+        "hi"
+      ],
+      [
+        "project",
+        "en"
+      ],
+      [
+        "जल्दी",
+        "hi"
+      ],
+      [
+        "submit",
+        "en"
+      ],
+      [
+        "करना है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_008",
+    "audio": "audio/eval_008.mp3",
+    "truth": "ye restaurant ka khana bahut tasty hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "यह",
+        "hi"
+      ],
+      [
+        "restaurant",
+        "en"
+      ],
+      [
+        "का खाना बहुत tasty है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_009",
+    "audio": "audio/eval_009.mp3",
+    "truth": "meri train late ho rahi hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "मेरी",
+        "hi"
+      ],
+      [
+        "train",
+        "en"
+      ],
+      [
+        "लेट हो रही है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_010",
+    "audio": "audio/eval_010.mp3",
+    "truth": "tumne assignment poora kiya ya nahi",
+    "switches": 2,
+    "chunks": [
+      [
+        "तुमने",
+        "hi"
+      ],
+      [
+        "assignment",
+        "en"
+      ],
+      [
+        "पूरा किया या नहीं",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_011",
+    "audio": "audio/eval_011.mp3",
+    "truth": "mujhe hindi gaane bahut pasand hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "मुझे",
+        "hi"
+      ],
+      [
+        "Hindi",
+        "en"
+      ],
+      [
+        "गाने बहुत पसंद हैं",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_012",
+    "audio": "audio/eval_012.mp3",
+    "truth": "kal interview hai to mujhe taiyari karni hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "कल",
+        "hi"
+      ],
+      [
+        "interview",
+        "en"
+      ],
+      [
+        "है तो मुझे तैयारी करनी है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_013",
+    "audio": "audio/eval_013.mp3",
+    "truth": "ye phone bahut mehenga hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "यह",
+        "hi"
+      ],
+      [
+        "phone",
+        "en"
+      ],
+      [
+        "बहुत महंगा है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_014",
+    "audio": "audio/eval_014.mp3",
+    "truth": "hum log weekend par movie dekhne jayenge",
+    "switches": 4,
+    "chunks": [
+      [
+        "हम लोग",
+        "hi"
+      ],
+      [
+        "weekend",
+        "en"
+      ],
+      [
+        "पर",
+        "hi"
+      ],
+      [
+        "movie",
+        "en"
+      ],
+      [
+        "देखने जाएंगे",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_015",
+    "audio": "audio/eval_015.mp3",
+    "truth": "mera internet bahut dheema chal raha hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "मेरा",
+        "hi"
+      ],
+      [
+        "internet",
+        "en"
+      ],
+      [
+        "बहुत धीमा चल रहा है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_016",
+    "audio": "audio/eval_016.mp3",
+    "truth": "aapko password badalna chahiye",
+    "switches": 2,
+    "chunks": [
+      [
+        "आपको",
+        "hi"
+      ],
+      [
+        "password",
+        "en"
+      ],
+      [
+        "बदलना चाहिए",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_017",
+    "audio": "audio/eval_017.mp3",
+    "truth": "ye book bahut interesting hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "यह",
+        "hi"
+      ],
+      [
+        "book",
+        "en"
+      ],
+      [
+        "बहुत interesting है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_018",
+    "audio": "audio/eval_018.mp3",
+    "truth": "mujhe doctor se appointment lena hai",
+    "switches": 4,
+    "chunks": [
+      [
+        "मुझे",
+        "hi"
+      ],
+      [
+        "doctor",
+        "en"
+      ],
+      [
+        "से",
+        "hi"
+      ],
+      [
+        "appointment",
+        "en"
+      ],
+      [
+        "लेना है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_019",
+    "audio": "audio/eval_019.mp3",
+    "truth": "ghar par wifi nahi chal raha",
+    "switches": 2,
+    "chunks": [
+      [
+        "घर पर",
+        "hi"
+      ],
+      [
+        "wifi",
+        "en"
+      ],
+      [
+        "नहीं चल रहा",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_020",
+    "audio": "audio/eval_020.mp3",
+    "truth": "maine online khana order kiya hai",
+    "switches": 4,
+    "chunks": [
+      [
+        "मैंने",
+        "hi"
+      ],
+      [
+        "online",
+        "en"
+      ],
+      [
+        "खाना",
+        "hi"
+      ],
+      [
+        "order",
+        "en"
+      ],
+      [
+        "किया है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_021",
+    "audio": "audio/eval_021.mp3",
+    "truth": "tum class mein aaye the ya nahi",
+    "switches": 2,
+    "chunks": [
+      [
+        "तुम",
+        "hi"
+      ],
+      [
+        "class",
+        "en"
+      ],
+      [
+        "में आए थे या नहीं",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_022",
+    "audio": "audio/eval_022.mp3",
+    "truth": "meri battery khatam ho gayi hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "मेरी",
+        "hi"
+      ],
+      [
+        "battery",
+        "en"
+      ],
+      [
+        "खत्म हो गई है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_023",
+    "audio": "audio/eval_023.mp3",
+    "truth": "humein team ke saath discussion karna hai",
+    "switches": 4,
+    "chunks": [
+      [
+        "हमें",
+        "hi"
+      ],
+      [
+        "team",
+        "en"
+      ],
+      [
+        "के साथ",
+        "hi"
+      ],
+      [
+        "discussion",
+        "en"
+      ],
+      [
+        "करना है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_024",
+    "audio": "audio/eval_024.mp3",
+    "truth": "ye song bahut accha hai phir se chalao",
+    "switches": 2,
+    "chunks": [
+      [
+        "यह",
+        "hi"
+      ],
+      [
+        "song",
+        "en"
+      ],
+      [
+        "बहुत अच्छा है, फिर से चलाओ",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_025",
+    "audio": "audio/eval_025.mp3",
+    "truth": "mera flight do ghante late hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "मेरा",
+        "hi"
+      ],
+      [
+        "flight",
+        "en"
+      ],
+      [
+        "दो घंटे लेट है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_026",
+    "audio": "audio/eval_026.mp3",
+    "truth": "aaj ka match bahut exciting tha",
+    "switches": 2,
+    "chunks": [
+      [
+        "आज का",
+        "hi"
+      ],
+      [
+        "match",
+        "en"
+      ],
+      [
+        "बहुत exciting था",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_027",
+    "audio": "audio/eval_027.mp3",
+    "truth": "mujhe english bolne mein thodi dikkat hoti hai",
+    "switches": 2,
+    "chunks": [
+      [
+        "मुझे",
+        "hi"
+      ],
+      [
+        "English",
+        "en"
+      ],
+      [
+        "बोलने में थोड़ी दिक्कत होती है",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_028",
+    "audio": "audio/eval_028.mp3",
+    "truth": "kya is hotel mein breakfast milega",
+    "switches": 4,
+    "chunks": [
+      [
+        "क्या इस",
+        "hi"
+      ],
+      [
+        "hotel",
+        "en"
+      ],
+      [
+        "में",
+        "hi"
+      ],
+      [
+        "breakfast",
+        "en"
+      ],
+      [
+        "मिलेगा",
+        "hi"
+      ]
+    ]
+  },
+  {
+    "id": "eval_029",
+    "audio": "audio/eval_029.mp3",
+    "truth": "pehle data backup kar lo phir install karo",
+    "switches": 4,
+    "chunks": [
+      [
+        "पहले",
+        "hi"
+      ],
+      [
+        "data",
+        "en"
+      ],
+      [
+        "बैकअप कर लो, फिर",
+        "hi"
+      ],
+      [
+        "install",
+        "en"
+      ],
+      [
+        "करो",
+        "hi"
+      ]
+    ]
+  }
+]

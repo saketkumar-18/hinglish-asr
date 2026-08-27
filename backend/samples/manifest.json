@@ -1,0 +1,22 @@
+[
+  {
+    "id": "eval_001",
+    "label": "Meeting mein presentation",
+    "truth": "mujhe kal meeting mein presentation deni hai"
+  },
+  {
+    "id": "eval_006",
+    "label": "Mera laptop kharab",
+    "truth": "aaj weather bahut accha hai"
+  },
+  {
+    "id": "eval_015",
+    "label": "Weekend par movie",
+    "truth": "mera internet bahut dheema chal raha hai"
+  },
+  {
+    "id": "eval_021",
+    "label": "Online khana order",
+    "truth": "tum class mein aaye the ya nahi"
+  }
+]

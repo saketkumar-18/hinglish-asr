@@ -1,0 +1,29 @@
+# models are large; fetch at deploy/boot instead
+models/
+*.bin
+*.part*
+
+# python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# eval audio is generated
+data/eval/audio/
+*.mp3
+!backend/samples/*.mp3
+
+# caches
+.cache/
+*.log
+
+# vercel / render local state
+.vercel/
+.render/
+
+# os
+.DS_Store
+Thumbs.db

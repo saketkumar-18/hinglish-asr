@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hinglish ASR — Code-Switching Speech Recognition</title>
+<meta name="description" content="Production ASR tuned for mixed Hindi-English (Hinglish) speech. Dual-pass Whisper fusion, Devanagari transliteration, word-level language tagging.">
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #12161f;
+    --panel2: #171c28;
+    --border: #232a3a;
+    --fg: #e8ecf4;
+    --muted: #8b94a7;
+    --accent: #ff9933;
+    --accent2: #138808;
+    --hi: #ffb35c;
+    --en: #6ec6ff;
+    --danger: #ff5c5c;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 28px 20px 80px; }
+  header { text-align: center; margin-bottom: 28px; }
+  .tricolor { height: 4px; width: 120px; margin: 0 auto 18px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent) 33%, #fff 33% 66%, var(--accent2) 66%); }
+  h1 { font-size: 2rem; letter-spacing: -0.5px; }
+  h1 .grad { background: linear-gradient(90deg, var(--hi), var(--en)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--muted); margin-top: 8px; font-size: 0.98rem; }
+  .badges { margin-top: 14px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .badge { font-size: 0.75rem; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); background: var(--panel); }
+  .badge b { color: var(--fg); }
+
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; justify-content: center; }
+  .tab { padding: 9px 22px; border-radius: 999px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); cursor: pointer; font-size: 0.92rem; transition: all .15s; }
+  .tab.active { background: var(--panel2); color: var(--fg); border-color: var(--accent); }
+
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 18px; }
+
+  /* recorder */
+  .rec-area { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+  .mic-btn {
+    width: 96px; height: 96px; border-radius: 50%; border: none; cursor: pointer;
+    background: radial-gradient(circle at 35% 30%, #2a3348, #1a2030);
+    color: var(--fg); font-size: 2.2rem; display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--border); transition: all .2s; position: relative;
+  }
+  .mic-btn:hover { border-color: var(--accent); transform: scale(1.04); }
+  .mic-btn.recording { border-color: var(--danger); animation: pulse 1.4s infinite; }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255,92,92,.45); }
+    70% { box-shadow: 0 0 0 22px rgba(255,92,92,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,92,92,0); }
+  }
+  .rec-status { color: var(--muted); font-size: 0.9rem; min-height: 1.2em; }
+  .rec-status.live { color: var(--danger); }
+  .alt-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn { padding: 10px 20px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel2); color: var(--fg); cursor: pointer; font-size: 0.9rem; transition: all .15s; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: linear-gradient(90deg, #b3541e, #8a4a1f); border-color: #b3541e; }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .drop { border: 2px dashed var(--border); border-radius: var(--radius); padding: 26px; text-align: center; color: var(--muted); cursor: pointer; width: 100%; transition: all .15s; }
+  .drop:hover, .drop.over { border-color: var(--accent); color: var(--fg); }
+  .samples { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .sample-btn { font-size: 0.82rem; padding: 7px 14px; }
+
+  /* result */
+  .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .stat { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat .v { font-size: 1.35rem; font-weight: 700; }
+  .stat .k { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-top: 4px; }
+  .langbar { height: 10px; border-radius: 5px; overflow: hidden; display: flex; margin: 4px 0 18px; border: 1px solid var(--border); }
+  .langbar .hi { background: var(--hi); }
+  .langbar .en { background: var(--en); }
+  .langbar-label { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; }
+
+  .transcript { font-size: 1.25rem; line-height: 2.1; }
+  .transcript .w { padding: 2px 3px; border-radius: 5px; }
+  .transcript .w.hi { color: var(--hi); background: rgba(255,179,92,.09); }
+  .transcript .w.en { color: var(--en); background: rgba(110,198,255,.09); }
+  .legend { display: flex; gap: 16px; margin-top: 14px; font-size: 0.8rem; color: var(--muted); }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  .segments { margin-top: 20px; }
+  .seg { display: flex; gap: 12px; padding: 10px 12px; border-radius: 8px; margin-bottom: 6px; background: var(--panel2); border: 1px solid var(--border); align-items: baseline; }
+  .seg .t { font-family: ui-monospace, monospace; font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+  .seg .src { font-size: 0.65rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); white-space: nowrap; }
+  .seg .src.hi { color: var(--hi); border-color: rgba(255,179,92,.4); }
+  .seg .src.en { color: var(--en); border-color: rgba(110,198,255,.4); }
+  .seg .txt { font-size: 0.95rem; }
+
+  .spinner { width: 34px; height: 34px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .center { text-align: center; color: var(--muted); padding: 30px 0; }
+  .error { color: var(--danger); background: rgba(255,92,92,.08); border: 1px solid rgba(255,92,92,.3); border-radius: 10px; padding: 14px; margin-top: 14px; font-size: 0.9rem; }
+  .hidden { display: none !important; }
+
+  /* benchmarks */
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: .05em; }
+  td.num { font-family: ui-monospace, monospace; }
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .metric { background: var(--panel2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .metric .v { font-size: 1.9rem; font-weight: 800; background: linear-gradient(90deg, var(--hi), var(--en)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .metric .k { color: var(--muted); font-size: 0.8rem; margin-top: 4px; }
+  .metric .d { color: var(--muted); font-size: 0.72rem; margin-top: 6px; }
+
+  .arch { display: grid; gap: 10px; }
+  .arch-step { display: flex; gap: 14px; align-items: flex-start; background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .arch-step .n { min-width: 30px; height: 30px; border-radius: 50%; background: var(--panel); border: 1px solid var(--accent); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
+  .arch-step b { display: block; margin-bottom: 3px; }
+  .arch-step p { color: var(--muted); font-size: 0.86rem; line-height: 1.5; }
+
+  footer { text-align: center; color: var(--muted); font-size: 0.78rem; margin-top: 40px; line-height: 1.7; }
+  footer a { color: var(--en); text-decoration: none; }
+  .api-row { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+  .api-row input { background: var(--panel2); border: 1px solid var(--border); color: var(--fg); border-radius: 8px; padding: 7px 12px; font-size: 0.8rem; width: 340px; max-width: 80vw; }
+  .api-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+  .api-dot.ok { background: #3ddc84; }
+  .api-dot.bad { background: var(--danger); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="tricolor"></div>
+    <h1>Hinglish <span class="grad">ASR</span></h1>
+    <p class="sub">Code-switching speech recognition for mixed Hindi–English — dual-pass Whisper fusion, Devanagari→Roman transliteration, word-level language tagging</p>
+    <div class="badges">
+      <span class="badge">model <b id="badge-model">…</b></span>
+      <span class="badge">dual-pass <b>en + hi</b></span>
+      <span class="badge">capstone <b>low-resource ASR</b></span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="transcribe">🎙 Transcribe</div>
+    <div class="tab" data-tab="benchmarks">📊 Benchmarks</div>
+    <div class="tab" data-tab="how">⚙ How it works</div>
+  </div>
+
+  <!-- ============ TRANSCRIBE ============ -->
+  <section id="tab-transcribe">
+    <div class="card">
+      <div class="rec-area">
+        <button class="mic-btn" id="micBtn" title="Record">🎙</button>
+        <div class="rec-status" id="recStatus">Tap to record Hinglish speech</div>
+        <div class="alt-actions">
+          <button class="btn" id="stopBtn" disabled>⏹ Stop &amp; transcribe</button>
+          <button class="btn" id="uploadBtn">📁 Upload audio file</button>
+          <input type="file" id="fileInput" accept="audio/*,.webm,.mp3,.wav,.m4a,.ogg" class="hidden">
+        </div>
+        <div class="drop" id="dropZone">…or drop an audio file here (webm / mp3 / wav / m4a, ≤ 25 MB)</div>
+        <div class="samples" id="samplesRow">
+          <span style="color:var(--muted);font-size:.8rem;align-self:center">Try a sample:</span>
+        </div>
+      </div>
+      <div class="error hidden" id="errBox"></div>
+    </div>
+
+    <div class="card hidden" id="progressCard">
+      <div class="center"><div class="spinner"></div><span id="progressText">Transcribing… dual-pass fusion running</span></div>
+    </div>
+
+    <div class="card hidden" id="resultCard">
+      <div class="stats-row" id="statsRow"></div>
+      <div class="langbar-label"><span>🟠 Hindi <b id="hiPct"></b></span><span>🔵 English <b id="enPct"></b></span></div>
+      <div class="langbar"><div class="hi" id="hiBar"></div><div class="en" id="enBar"></div></div>
+      <div class="transcript" id="transcript"></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--hi)"></span>Hindi (romanized)</span>
+        <span><span class="dot" style="background:var(--en)"></span>English</span>
+        <span>⚡ = code-switch point</span>
+      </div>
+      <div class="segments" id="segments"></div>
+      <div style="margin-top:16px;text-align:right">
+        <button class="btn" id="copyBtn">📋 Copy transcript</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BENCHMARKS ============ -->
+  <section id="tab-benchmarks" class="hidden">
+    <div class="card">
+      <div id="benchContent"><div class="center"><div class="spinner"></div>Loading benchmark results…</div></div>
+    </div>
+  </section>
+
+  <!-- ============ HOW ============ -->
+  <section id="tab-how" class="hidden">
+    <div class="card">
+      <div class="arch">
+        <div class="arch-step"><div class="n">1</div><div><b>Audio in</b><p>Browser MediaRecorder (webm/opus) or uploaded file → 16 kHz mono decode server-side.</p></div></div>
+        <div class="arch-step"><div class="n">2</div><div><b>Dual-pass Whisper decoding</b><p>faster-whisper (CTranslate2, int8) runs twice over the same audio: once forced to <b>English</b>, once to <b>Hindi</b>. Each language prior captures the words the other misses — English pass nails embedded English nouns, Hindi pass nails Devanagari phrases.</p></div></div>
+        <div class="arch-step"><div class="n">3</div><div><b>Time-aligned fusion</b><p>Segments from both passes are aligned by timestamp; per segment the hypothesis with the better length-normalized log-probability wins. Hindi output is transliterated to Roman script so the transcript is consistently Hinglish.</p></div></div>
+        <div class="arch-step"><div class="n">4</div><div><b>Hinglish post-processing</b><p>Devanagari→Roman transliterator with word-final schwa deletion (कम → <i>kam</i>), spelling-variant canonicalization (bohot/bhaut → <i>bahut</i>), and punctuation cleanup.</p></div></div>
+        <div class="arch-step"><div class="n">5</div><div><b>Language tagging &amp; switch detection</b><p>Every word is tagged hi/en via lexicon + script heuristics; adjacent tag changes are counted as code-switch points. Drives the colored transcript and the Hindi/English ratio.</p></div></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom:10px">Why this matters</h3>
+      <p style="color:var(--muted);font-size:.9rem;line-height:1.7">
+        Over 100M Indians regularly code-switch between Hindi and English mid-sentence, yet mainstream ASR is monolingual:
+        an English model mangles Hindi words into near-misses, a Hindi model emits Devanagari for everything and loses embedded English terms.
+        This system treats code-switching as the <b style="color:var(--fg)">primary case</b>, not an edge case — evaluated on a synthetic
+        Hinglish corpus with known switch points, reporting WER, CER and switch-detection accuracy.
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="api-row">
+      <span class="api-dot" id="apiDot"></span>
+      <input id="apiUrl" spellcheck="false">
+      <button class="btn" id="apiSet" style="padding:7px 14px">Set</button>
+    </div>
+    <p style="margin-top:12px">Hinglish ASR · capstone project · faster-whisper + custom fusion layer<br>
+    <a href="/api/benchmarks" id="benchLink">benchmark JSON</a></p>
+  </footer>
+</div>
+
+<script>
+const DEFAULT_APIS = [
+  "https://hinglish-asr.hf.space",
+  "http://localhost:8000"
+];
+let API = localStorage.getItem("hinglish_api") || DEFAULT_APIS[0];
+let mediaRecorder = null, chunks = [], recording = false, lastResult = null;
+
+const $ = id => document.getElementById(id);
+const apiUrlInput = $("apiUrl");
+apiUrlInput.value = API;
+
+// ---------- tabs ----------
+document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+  t.classList.add("active");
+  ["transcribe","benchmarks","how"].forEach(n => $("tab-"+n).classList.add("hidden"));
+  $("tab-"+t.dataset.tab).classList.remove("hidden");
+  if (t.dataset.tab === "benchmarks") loadBenchmarks();
+}));
+
+// ---------- api health ----------
+async function pingApi(url) {
+  try {
+    const r = await fetch(url + "/api/health", { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; }
+}
+async function resolveApi() {
+  if (localStorage.getItem("hinglish_api")) {
+    const h = await pingApi(API);
+    if (h) return applyHealth(h);
+  }
+  for (const u of DEFAULT_APIS) {
+    const h = await pingApi(u);
+    if (h) { API = u; apiUrlInput.value = u; return applyHealth(h); }
+  }
+  $("apiDot").className = "api-dot bad";
+}
+function applyHealth(h) {
+  $("apiDot").className = "api-dot ok";
+  $("badge-model").textContent = h.model + " (" + h.compute + ")";
+}
+$("apiSet").addEventListener("click", () => {
+  API = apiUrlInput.value.trim().replace(/\/$/, "");
+  localStorage.setItem("hinglish_api", API);
+  resolveApi();
+});
+
+// ---------- recording ----------
+$("micBtn").addEventListener("click", async () => {
+  if (recording) return stopRecording(true);
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mime = MediaRecorder.isTypeSupported("audio/webm;codecs=opus") ? "audio/webm;codecs=opus" : "";
+    mediaRecorder = new MediaRecorder(stream, mime ? { mimeType: mime } : {});
+    chunks = [];
+    mediaRecorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    mediaRecorder.onstop = () => stream.getTracks().forEach(t => t.stop());
+    mediaRecorder.start();
+    recording = true;
+    $("micBtn").classList.add("recording");
+    $("micBtn").textContent = "⏺";
+    $("recStatus").textContent = "Recording… speak in Hinglish, tap again or press Stop";
+    $("recStatus").classList.add("live");
+    $("stopBtn").disabled = false;
+  } catch (e) {
+    showErr("Microphone unavailable: " + e.message + ". Use file upload instead.");
+  }
+});
+$("stopBtn").addEventListener("click", () => stopRecording(true));
+
+function stopRecording(transcribe) {
+  if (!mediaRecorder || !recording) return;
+  recording = false;
+  mediaRecorder.onstop = () => {
+    mediaRecorder.stream.getTracks().forEach(t => t.stop());
+    if (transcribe && chunks.length) {
+      const blob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
+      sendAudio(blob, "recording.webm");
+    }
+  };
+  mediaRecorder.stop();
+  $("micBtn").classList.remove("recording");
+  $("micBtn").textContent = "🎙";
+  $("recStatus").textContent = "Tap to record Hinglish speech";
+  $("recStatus").classList.remove("live");
+  $("stopBtn").disabled = true;
+}
+
+// ---------- upload / drop ----------
+$("uploadBtn").addEventListener("click", () => $("fileInput").click());
+$("fileInput").addEventListener("change", e => { if (e.target.files[0]) sendAudio(e.target.files[0], e.target.files[0].name); });
+const dz = $("dropZone");
+["dragover","dragenter"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("over"); }));
+["dragleave","drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("over"); }));
+dz.addEventListener("drop", e => { if (e.dataTransfer.files[0]) sendAudio(e.dataTransfer.files[0], e.dataTransfer.files[0].name); });
+dz.addEventListener("click", () => $("fileInput").click());
+
+// ---------- samples ----------
+async function loadSamples() {
+  try {
+    const r = await fetch(API + "/api/samples", { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return;
+    const list = await r.json();
+    const row = $("samplesRow");
+    list.slice(0, 4).forEach(s => {
+      const b = document.createElement("button");
+      b.className = "btn sample-btn";
+      b.textContent = "▶ " + s.label;
+      b.addEventListener("click", async () => {
+        const ab = await (await fetch(API + s.url)).arrayBuffer();
+        sendAudio(new Blob([ab], { type: "audio/mpeg" }), s.id + ".mp3");
+      });
+      row.appendChild(b);
+    });
+  } catch {}
+}
+
+// ---------- transcribe ----------
+async function sendAudio(blob, name) {
+  hideErr();
+  $("progressCard").classList.remove("hidden");
+  $("resultCard").classList.add("hidden");
+  $("progressText").textContent = `Transcribing ${name} — dual-pass fusion running…`;
+  const fd = new FormData();
+  fd.append("file", blob, name);
+  const t0 = performance.now();
+  try {
+    const r = await fetch(API + "/api/transcribe?dual_pass=true", { method: "POST", body: fd });
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.detail || ("HTTP " + r.status));
+    lastResult = j;
+    renderResult(j);
+  } catch (e) {
+    showErr("Transcription failed: " + e.message + (e.message.includes("Failed to fetch") ? " — is the backend URL correct?" : ""));
+  } finally {
+    $("progressCard").classList.add("hidden");
+  }
+}
+
+function renderResult(j) {
+  const card = $("resultCard");
+  card.classList.remove("hidden");
+  // stats
+  const stats = [
+    { v: j.duration_s + "s", k: "audio length" },
+    { v: j.processing_s + "s", k: "processing" },
+    { v: j.rtf != null ? j.rtf + "×" : "—", k: "real-time factor" },
+    { v: j.switches, k: "code-switches" },
+    { v: j.segments.length, k: "segments" },
+  ];
+  $("statsRow").innerHTML = stats.map(s => `<div class="stat"><div class="v">${s.v}</div><div class="k">${s.k}</div></div>`).join("");
+  // lang bar
+  const hi = Math.round((j.language_ratio.hi || 0) * 100), en = 100 - hi;
+  $("hiPct").textContent = hi + "%"; $("enPct").textContent = en + "%";
+  $("hiBar").style.width = hi + "%"; $("enBar").style.width = en + "%";
+  // transcript with tags + switch markers
+  let html = "", prev = null;
+  for (const t of j.tagged) {
+    if (prev && t.lang !== prev) html += `<span style="color:var(--accent);font-size:.85em" title="code-switch">⚡</span> `;
+    html += `<span class="w ${t.lang}">${escapeHtml(t.word)}</span> `;
+    prev = t.lang;
+  }
+  $("transcript").innerHTML = html || `<span style="color:var(--muted)">(no speech detected)</span>`;
+  // segments
+  $("segments").innerHTML = "<h3 style='margin:6px 0 12px;font-size:.95rem;color:var(--muted)'>Segments (with source pass)</h3>" +
+    j.segments.map(s => `<div class="seg"><span class="t">${fmtT(s.start)}–${fmtT(s.end)}</span><span class="src ${s.source}">${s.source === "hi" ? "HI pass" : "EN pass"}</span><span class="txt">${escapeHtml(s.text)}</span></div>`).join("");
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+$("copyBtn").addEventListener("click", () => {
+  if (lastResult) navigator.clipboard.writeText(lastResult.text).then(() => {
+    $("copyBtn").textContent = "✓ Copied"; setTimeout(() => $("copyBtn").textContent = "📋 Copy transcript", 1500);
+  });
+});
+
+// ---------- benchmarks ----------
+let benchLoaded = false;
+async function loadBenchmarks() {
+  if (benchLoaded) return;
+  try {
+    const r = await fetch(API + "/api/benchmarks", { signal: AbortSignal.timeout(10000) });
+    const j = await r.json();
+    renderBenchmarks(j);
+    benchLoaded = true;
+  } catch (e) {
+    $("benchContent").innerHTML = `<div class="error">Could not load benchmarks: ${escapeHtml(e.message)}</div>`;
+  }
+}
+function renderBenchmarks(j) {
+  if (j.note) { $("benchContent").innerHTML = `<div class="center">${escapeHtml(j.note)}</div>`; return; }
+  const m = j.metrics || j;
+  const metrics = [
+    { v: pct(m.wer_dual ?? m.wer), k: "WER (dual-pass)", d: "word error rate on synthetic Hinglish corpus" },
+    { v: pct(m.cer_dual ?? m.cer), k: "CER (dual-pass)", d: "character error rate" },
+    { v: pct(m.wer_en_only), k: "WER (English-only baseline)", d: "single English pass — no fusion" },
+    { v: (m.switch_accuracy != null ? pct(m.switch_accuracy) : "—"), k: "Switch detection", d: "code-switch points found vs ground truth" },
+  ];
+  let html = `<div class="metric-grid">${metrics.map(x => `<div class="metric"><div class="v">${x.v ?? "—"}</div><div class="k">${x.k}</div><div class="d">${x.d}</div></div>`).join("")}</div>`;
+  if (j.per_item && j.per_item.length) {
+    html += `<h3 style="margin-bottom:10px;font-size:.95rem">Per-utterance results (${j.per_item.length} utterances)</h3>
+    <div style="overflow-x:auto"><table><thead><tr><th>ID</th><th>Ground truth</th><th>Hypothesis</th><th>WER</th><th>Switches (gt/pred)</th></tr></thead><tbody>`;
+    for (const it of j.per_item) {
+      html += `<tr><td class="num">${it.id}</td><td>${escapeHtml(it.truth)}</td><td>${escapeHtml(it.hyp)}</td><td class="num">${pct(it.wer)}</td><td class="num">${it.switches_gt} / ${it.switches_pred}</td></tr>`;
+    }
+    html += "</tbody></table></div>";
+  }
+  if (j.meta) html += `<p style="color:var(--muted);font-size:.78rem;margin-top:14px">model: ${escapeHtml(j.meta.model || "")} · generated: ${escapeHtml(j.meta.generated || "")} · corpus: synthetic gTTS Hinglish (${j.per_item ? j.per_item.length : "?"} utterances)</p>`;
+  $("benchContent").innerHTML = html;
+}
+
+// ---------- utils ----------
+function pct(x) { return x == null ? null : (x * 100).toFixed(1) + "%"; }
+function fmtT(s) { const m = Math.floor(s/60), ss = (s%60).toFixed(1).padStart(4,"0"); return `${m}:${ss}`; }
+function escapeHtml(s) { return (s||"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function showErr(msg) { $("errBox").textContent = msg; $("errBox").classList.remove("hidden"); }
+function hideErr() { $("errBox").classList.add("hidden"); }
+
+resolveApi();
+loadSamples();
+</script>
+</body>
+</html>
