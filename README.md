@@ -99,7 +99,7 @@ python scripts/test_hinglish.py           # unit tests
 
 ## Deploy
 
-- **Backend**: Render free tier (Docker, base model baked into image) → `https://hinglish-asr.onrender.com`
+- **Backend**: Render free tier (Docker, base model baked into image) → `https://hinglish-asr-y6az.onrender.com`
 - **Frontend**: Vercel static → `https://hinglish-asr.vercel.app` (auto-discovers backend, URL configurable in-page)
 - `Dockerfile.hf` is an alternate HF Space image (small model, downloaded at boot) if you prefer HF hosting.
 
